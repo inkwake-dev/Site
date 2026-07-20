@@ -1,0 +1,357 @@
+/* ==========================================================================
+   INKWAKE — main.js
+   Scroll reveals, ink-divider draw-in, FAQ accordion, portfolio filter +
+   load more, skill bar fill, animated counters, contact/apply form
+   validation. Vanilla JS, no build step.
+   ========================================================================== */
+
+/* ---------- Generic scroll reveal ---------- */
+function inkwakeInitReveal(){
+  const targets = document.querySelectorAll('.reveal, .ink-divider, .footer-links.reveal-list');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting){
+        entry.target.classList.add('in-view');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.2 });
+  targets.forEach(t => io.observe(t));
+}
+
+/* ---------- Skill bars (About page) ---------- */
+function inkwakeInitSkillBars(){
+  const bars = document.querySelectorAll('.skill-fill');
+  if(!bars.length) return;
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting){
+        const target = entry.target.getAttribute('data-fill') || '0%';
+        entry.target.style.width = target;
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.4 });
+  bars.forEach(b => io.observe(b));
+}
+
+/* ---------- Animated counters (hero stats) ---------- */
+function inkwakeInitCounters(){
+  const counters = document.querySelectorAll('[data-count]');
+  if(!counters.length) return;
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(!entry.isIntersecting) return;
+      const el = entry.target;
+      const end = parseInt(el.getAttribute('data-count'), 10);
+      const suffix = el.getAttribute('data-suffix') || '';
+      const duration = 1200;
+      const start = performance.now();
+      function tick(now){
+        const p = Math.min((now - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - p, 3);
+        el.textContent = Math.round(eased * end) + suffix;
+        if(p < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+      io.unobserve(el);
+    });
+  }, { threshold: 0.6 });
+  counters.forEach(c => io.observe(c));
+}
+
+/* ---------- FAQ accordion ---------- */
+function inkwakeInitFaq(){
+  document.querySelectorAll('.faq-item').forEach(item => {
+    const btn = item.querySelector('.faq-q');
+    const ans = item.querySelector('.faq-a');
+    if(!btn || !ans) return;
+    btn.addEventListener('click', () => {
+      const isOpen = item.getAttribute('data-open') === 'true';
+      document.querySelectorAll('.faq-item').forEach(other => {
+        other.setAttribute('data-open','false');
+        other.querySelector('.faq-a').style.maxHeight = null;
+        other.querySelector('.faq-q').setAttribute('aria-expanded','false');
+      });
+      if(!isOpen){
+        item.setAttribute('data-open','true');
+        ans.style.maxHeight = ans.scrollHeight + 'px';
+        btn.setAttribute('aria-expanded','true');
+      }
+    });
+  });
+}
+
+/* ---------- Portfolio filter + load more ---------- */
+function inkwakeInitPortfolio(){
+  const grid = document.querySelector('[data-project-grid]');
+  if(!grid) return;
+  const cards = Array.from(grid.querySelectorAll('.project-card'));
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  const loadMoreBtn = document.querySelector('[data-load-more]');
+  const pageSize = 6;
+  let activeFilter = 'all';
+  let visibleCount = pageSize;
+
+  function render(){
+    const filtered = cards.filter(c => activeFilter === 'all' || c.getAttribute('data-category') === activeFilter);
+    filtered.forEach((c, i) => { c.style.display = i < visibleCount ? '' : 'none'; });
+    cards.filter(c => !filtered.includes(c)).forEach(c => c.style.display = 'none');
+    if(loadMoreBtn) loadMoreBtn.style.display = filtered.length > visibleCount ? 'inline-flex' : 'none';
+  }
+
+  filterBtns.forEach(btn => btn.addEventListener('click', () => {
+    filterBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.getAttribute('data-filter');
+    visibleCount = pageSize;
+    render();
+  }));
+
+  if(loadMoreBtn) loadMoreBtn.addEventListener('click', () => { visibleCount += pageSize; render(); });
+
+  render();
+}
+
+/* ---------- Real-time form validation (Contact / Apply) ---------- */
+function inkwakeValidateField(field){
+  const input = field.querySelector('input, select, textarea');
+  const errorEl = field.querySelector('.error-msg');
+  if(!input) return true;
+  let message = '';
+
+  if(input.hasAttribute('required') && !input.value.trim()){
+    message = 'This field is required.';
+  } else if(input.type === 'email' && input.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value)){
+    message = 'Enter a valid email address.';
+  } else if(input.type === 'tel' && input.value && !/^[0-9+\-\s()]{7,15}$/.test(input.value)){
+    message = 'Enter a valid phone number.';
+  }
+
+  field.classList.toggle('invalid', !!message);
+  if(errorEl) errorEl.textContent = message;
+  return !message;
+}
+
+function inkwakeInitForm(formSelector, successSelector){
+  const form = document.querySelector(formSelector);
+  if(!form) return;
+  const success = document.querySelector(successSelector);
+  const submitBtn = form.querySelector('button[type="submit"]');
+
+  form.querySelectorAll('.field').forEach(field => {
+    const input = field.querySelector('input, select, textarea');
+    if(!input) return;
+    input.addEventListener('blur', () => inkwakeValidateField(field));
+    input.addEventListener('input', () => { if(field.classList.contains('invalid')) inkwakeValidateField(field); });
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    let valid = true;
+    form.querySelectorAll('.field').forEach(field => { if(!inkwakeValidateField(field)) valid = false; });
+
+    // Required checkboxes outside .field wrappers (e.g. Terms & Privacy agreement)
+    form.querySelectorAll('.field-checkbox input[type="checkbox"][required]').forEach(cb => {
+      const wrap = cb.closest('.field-checkbox');
+      if(!cb.checked){
+        valid = false;
+        wrap.style.outline = '1px solid #ff8080';
+        wrap.style.borderRadius = '8px';
+      } else {
+        wrap.style.outline = '';
+      }
+    });
+
+    if(!valid){
+      form.querySelector('.invalid input, .invalid select, .invalid textarea')?.focus();
+      return;
+    }
+
+    const key = window.INKWAKE_CONFIG?.web3formsAccessKey;
+    const configured = key && key !== 'YOUR_WEB3FORMS_ACCESS_KEY';
+
+    if(!configured){
+      // Demo mode: no Web3Forms key set yet. Show success in the UI so the
+      // flow can be reviewed, but log a clear warning — nothing is sent.
+      console.warn('Inkwake: web3formsAccessKey is not set in assets/js/include.js — this submission was NOT sent anywhere.');
+      if(success){ success.classList.add('show'); form.reset(); }
+      return;
+    }
+
+    const formData = new FormData(form);
+    formData.append('access_key', key);
+    if(submitBtn){ submitBtn.disabled = true; submitBtn.textContent = 'Sending…'; }
+
+    try{
+      const res = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' },
+        body: formData
+      });
+      const result = await res.json();
+      if(result.success){
+        if(success){ success.classList.add('show'); form.reset(); }
+      } else {
+        throw new Error(result.message || 'Submission failed');
+      }
+    } catch(err){
+      console.error('Inkwake: form submission failed', err);
+      alert("Something went wrong sending your message. Please try again, or reach us directly on WhatsApp.");
+    } finally {
+      if(submitBtn){ submitBtn.disabled = false; submitBtn.textContent = submitBtn.getAttribute('data-label') || 'Submit'; }
+    }
+  });
+}
+
+/* ---------- Scrollspy: highlight the current section in the nav ---------- */
+function inkwakeInitScrollspy(){
+  const sections = document.querySelectorAll('main [id]');
+  const links = document.querySelectorAll('.nav-links a[data-section], .drawer a[data-section]');
+  if(!sections.length || !links.length) return;
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(!entry.isIntersecting) return;
+      links.forEach(l => l.removeAttribute('aria-current'));
+      const match = document.querySelector(`.nav-links a[data-section="${entry.target.id}"]`);
+      if(match) match.setAttribute('aria-current','section');
+    });
+  }, { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
+
+  sections.forEach(s => io.observe(s));
+}
+
+/* ---------- Parallax: background layers drift horizontally on scroll ---------- */
+function inkwakeInitParallax(){
+  const layers = document.querySelectorAll('.parallax-layer');
+  if(!layers.length) return;
+  let ticking = false;
+
+  function update(){
+    const y = window.scrollY;
+    layers.forEach(layer => {
+      const speed = parseFloat(layer.getAttribute('data-speed')) || 0.08;
+      const dir = layer.getAttribute('data-dir') === 'left' ? -1 : 1;
+      const offset = Math.min(y * speed * dir, 260);
+      layer.style.transform = `translateX(${offset}px)`;
+    });
+    ticking = false;
+  }
+  window.addEventListener('scroll', () => {
+    if(!ticking){ requestAnimationFrame(update); ticking = true; }
+  }, { passive: true });
+  update();
+}
+
+/* ---------- Testimonials carousel ---------- */
+function inkwakeInitTestimonials(){
+  const track = document.querySelector('[data-testimonial-track]');
+  if(!track) return;
+  const slides = Array.from(track.children);
+  const dotsWrap = document.querySelector('[data-testimonial-dots]');
+  let index = 0;
+
+  slides.forEach((_, i) => {
+    const dot = document.createElement('button');
+    if(i === 0) dot.classList.add('active');
+    dot.setAttribute('aria-label', `Show testimonial ${i + 1}`);
+    dot.addEventListener('click', () => goTo(i));
+    dotsWrap?.appendChild(dot);
+  });
+
+  function goTo(i){
+    index = (i + slides.length) % slides.length;
+    track.style.transform = `translateX(-${index * 100}%)`;
+    dotsWrap?.querySelectorAll('button').forEach((d, di) => d.classList.toggle('active', di === index));
+  }
+
+  let auto = setInterval(() => goTo(index + 1), 6000);
+  track.closest('.testimonial-track-wrap')?.addEventListener('mouseenter', () => clearInterval(auto));
+}
+
+/* ---------- Careers application modal ---------- */
+function inkwakeInitModal(){
+  const backdrop = document.querySelector('[data-modal-backdrop]');
+  if(!backdrop) return;
+  const roleField = document.getElementById('a-role');
+
+  function open(role){
+    backdrop.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    if(role && roleField) roleField.value = role;
+  }
+  function close(){
+    backdrop.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  document.querySelectorAll('[data-apply-role]').forEach(btn => {
+    btn.addEventListener('click', () => open(btn.getAttribute('data-apply-role')));
+  });
+  backdrop.querySelectorAll('[data-close-modal]').forEach(el => el.addEventListener('click', close));
+  backdrop.addEventListener('click', (e) => { if(e.target === backdrop) close(); });
+  document.addEventListener('keydown', (e) => { if(e.key === 'Escape') close(); });
+}
+
+/* ---------- Terms / Privacy standalone accept checkbox ---------- */
+function inkwakeInitAcceptBlock(){
+  const block = document.querySelector('[data-accept-block]');
+  if(!block) return;
+  const KEY = block.getAttribute('data-accept-key') || 'inkwake_accept';
+  const checkbox = block.querySelector('input[type="checkbox"]');
+  const status = block.querySelector('.accept-status');
+
+  if(localStorage.getItem(KEY) === 'accepted' && checkbox){
+    checkbox.checked = true;
+    status?.classList.add('show');
+  }
+
+  checkbox?.addEventListener('change', () => {
+    if(checkbox.checked){
+      localStorage.setItem(KEY, 'accepted');
+      status?.classList.add('show');
+    } else {
+      localStorage.removeItem(KEY);
+      status?.classList.remove('show');
+    }
+  });
+}
+function inkwakeInitCookieConsent(){
+  const banner = document.querySelector('[data-cookie-banner]');
+  if(!banner) return;
+  const KEY = 'inkwake_cookie_consent';
+
+  if(!localStorage.getItem(KEY)){
+    setTimeout(() => banner.classList.add('show'), 900);
+  }
+  banner.querySelector('[data-cookie-accept]')?.addEventListener('click', () => {
+    localStorage.setItem(KEY, 'accepted');
+    banner.classList.remove('show');
+  });
+  banner.querySelector('[data-cookie-decline]')?.addEventListener('click', () => {
+    localStorage.setItem(KEY, 'declined');
+    banner.classList.remove('show');
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Partials load asynchronously in include.js; give the DOM a tick so
+  // reveal-list footer links (inside partials) get observed correctly.
+  setTimeout(() => {
+    inkwakeInitReveal();
+  }, 60);
+
+  inkwakeInitSkillBars();
+  inkwakeInitCounters();
+  inkwakeInitFaq();
+  inkwakeInitPortfolio();
+  inkwakeInitForm('#contact-form', '#contact-success');
+  inkwakeInitForm('#apply-form', '#apply-success');
+  inkwakeInitScrollspy();
+  inkwakeInitParallax();
+  inkwakeInitTestimonials();
+  inkwakeInitCookieConsent();
+  inkwakeInitModal();
+  inkwakeInitAcceptBlock();
+});
