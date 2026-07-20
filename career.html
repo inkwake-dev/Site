@@ -256,10 +256,18 @@
         <span class="error-msg"></span>
       </div>
       
-      <div class="field">
+<div class="field">
         <label for="a-phone">Phone Number</label>
-        <!-- Changed to fi-sender-phone -->
-        <input type="tel" id="a-phone" name="fi-sender-phone" required>
+        <!-- Added value="+91" to auto-fill the box -->
+        <input 
+          type="tel" 
+          id="a-phone" 
+          name="fi-sender-phone" 
+          value="+91" 
+          pattern="^\+[1-9]\d{1,14}$" 
+          title="Please include your country code starting with a + (e.g., +91)" 
+          required
+        >
         <span class="error-msg"></span>
       </div>
       
