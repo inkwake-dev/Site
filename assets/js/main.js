@@ -366,7 +366,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Here is where the magic happens! We pass the specific service for each form.
   inkwakeInitForm('#contact-form', '#contact-success', 'web3forms');
-  inkwakeInitForm('#apply-form', '#apply-success', 'forminit');
+  // inkwakeInitForm('#apply-form', '#apply-success', 'forminit');
   
   inkwakeInitScrollspy();
   inkwakeInitParallax();
