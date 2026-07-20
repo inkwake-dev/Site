@@ -2,7 +2,7 @@
    INKWAKE — main.js
    Scroll reveals, ink-divider draw-in, FAQ accordion, portfolio filter +
    load more, skill bar fill, animated counters, contact/apply form
-   validation. Vanilla JS, no build step.
+   validation, and phone number formatting. Vanilla JS, no build step.
    ========================================================================== */
 
 /* ---------- Generic scroll reveal ---------- */
@@ -354,6 +354,28 @@ function inkwakeInitCookieConsent(){
   });
 }
 
+/* ---------- Phone Number Formatting (E.164 Enforcer) ---------- */
+function inkwakeInitPhoneFormatting(){
+  const phoneInputs = document.querySelectorAll('input[type="tel"]');
+  
+  phoneInputs.forEach(input => {
+    // Pre-fill with +91 if it's completely empty when clicked
+    input.addEventListener('focus', function() {
+      if (this.value === '') {
+        this.value = '+91';
+      }
+    });
+
+    // Prevent the user from deleting the '+' sign
+    input.addEventListener('input', function() {
+      if (this.value !== '' && !this.value.startsWith('+')) {
+        // If they deleted the +, put it back and strip any weird characters
+        this.value = '+' + this.value.replace(/[^0-9]/g, '');
+      }
+    });
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
     inkwakeInitReveal();
@@ -364,8 +386,13 @@ document.addEventListener('DOMContentLoaded', () => {
   inkwakeInitFaq();
   inkwakeInitPortfolio();
   
+  // Initialize the new phone formatting feature
+  inkwakeInitPhoneFormatting();
+  
   // Here is where the magic happens! We pass the specific service for each form.
   inkwakeInitForm('#contact-form', '#contact-success', 'web3forms');
+  
+  // Keep this commented out so Forminit file uploads work natively via the browser!
   // inkwakeInitForm('#apply-form', '#apply-success', 'forminit');
   
   inkwakeInitScrollspy();
