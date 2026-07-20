@@ -3,4 +3,3 @@ Allow: /
 
 # Direct path to your production sitemap
 Sitemap: https://vercel.app
-
