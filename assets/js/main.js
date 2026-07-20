@@ -348,7 +348,7 @@ document.addEventListener('DOMContentLoaded', () => {
   inkwakeInitCounters();
   inkwakeInitFaq();
   inkwakeInitPortfolio();
-  inkwakeInitForm('#contact-form', '#contact-success');
+  // inkwakeInitForm('#contact-form', '#contact-success');
   inkwakeInitForm('#apply-form', '#apply-success');
   inkwakeInitScrollspy();
   inkwakeInitParallax();
