@@ -133,6 +133,7 @@ function inkwakeValidateField(field){
   return !message;
 }
 
+/* ---------- Real-time form validation (Contact / Apply) ---------- */
 function inkwakeInitForm(formSelector, successSelector){
   const form = document.querySelector(formSelector);
   if(!form) return;
@@ -168,25 +169,26 @@ function inkwakeInitForm(formSelector, successSelector){
       return;
     }
 
-    const key = window.INKWAKE_CONFIG?.web3formsAccessKey;
+    // UPDATED: Correctly grab the key from include.js
+    const key = typeof web3formsAccessKey !== 'undefined' ? web3formsAccessKey : '';
     const configured = key && key !== 'YOUR_WEB3FORMS_ACCESS_KEY';
 
     if(!configured){
-      // Demo mode: no Web3Forms key set yet. Show success in the UI so the
-      // flow can be reviewed, but log a clear warning — nothing is sent.
-      console.warn('Inkwake: web3formsAccessKey is not set in assets/js/include.js — this submission was NOT sent anywhere.');
+      console.warn('Inkwake: web3formsAccessKey is not set in include.js — this submission was NOT sent anywhere.');
       if(success){ success.classList.add('show'); form.reset(); }
       return;
     }
 
+    // FormData automatically handles file inputs as long as the HTML enctype is set
     const formData = new FormData(form);
     formData.append('access_key', key);
+    
     if(submitBtn){ submitBtn.disabled = true; submitBtn.textContent = 'Sending…'; }
 
     try{
       const res = await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
-        headers: { 'Accept': 'application/json' },
+        headers: { 'Accept': 'application/json' }, // Do NOT set Content-Type, the browser handles it for files
         body: formData
       });
       const result = await res.json();
@@ -197,7 +199,7 @@ function inkwakeInitForm(formSelector, successSelector){
       }
     } catch(err){
       console.error('Inkwake: form submission failed', err);
-      alert("Something went wrong sending your message. Please try again, or reach us directly on WhatsApp.");
+      alert("Something went wrong sending your application. Please check your file size (Max 5MB) and try again.");
     } finally {
       if(submitBtn){ submitBtn.disabled = false; submitBtn.textContent = submitBtn.getAttribute('data-label') || 'Submit'; }
     }
