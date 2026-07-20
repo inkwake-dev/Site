@@ -24,8 +24,6 @@
 <nav class="nav">
   <div class="nav-inner">
     <a href="index.html" class="brand">
-      <!-- LOGO PLACEHOLDER (NAV): replace with your Inkwake SVG, e.g.
-           <img src="assets/images/inkwake-logo.svg" alt="Inkwake logo"> -->
       <img src="assets\images\favicon.png" alt="Inkwake logo">
       Inkwake
     </a>
@@ -153,13 +151,11 @@
     <div class="footer-grid">
       <div>
         <a href="index.html" class="brand" style="margin-bottom:16px;">
-          <!-- LOGO PLACEHOLDER (FOOTER): replace with your Inkwake SVG -->
           <img src="assets\images\logo1.png" alt="Inkwake logo">
           Inkwake
         </a>
         <p style="max-width:34ch;">A premium freelancer team bridging the gap between artistic design and robust software engineering. Built with passion, delivered with purpose.</p>
 
-        <!-- FOUNDER SECTION: swap the name/photo/link for your actual details -->
         <div class="founder-card">
           <div class="avatar-sm"><img src="assets/images/avatar.jpg" alt="Inkwake founder"></div>
           <div>
@@ -233,7 +229,7 @@
 <script>document.getElementById('year') && (document.getElementById('year').textContent = new Date().getFullYear());</script>
 
 <!-- =========================================================================
-     APPLICATION MODAL — Web3Forms (set your access key in assets/js/include.js)
+     APPLICATION MODAL — Web3Forms Native Submission Test
      ========================================================================= -->
 <div class="modal-backdrop" data-modal-backdrop>
   <div class="modal modal-wrap" role="dialog" aria-modal="true" aria-label="Job application form">
@@ -249,9 +245,15 @@
       <button class="btn btn-ghost btn-sm" data-close-modal type="button">Close</button>
     </div>
 
-    <form id="apply-form" class="form-grid" enctype="multipart/form-data" novalidate>
+    <!-- UPDATED FORM TAG FOR NATIVE HTML TESTING -->
+    <form action="https://api.web3forms.com/submit" method="POST" id="apply-form" class="form-grid" enctype="multipart/form-data" novalidate>
+      
+      <!-- Hardcoded API Key and Email directoves -->
+      <input type="hidden" name="access_key" value="1c0a9213-c2cb-4183-b685-5d24eb3e6835">
+      <input type="hidden" name="subject" value="New Inkwake job application">
       <input type="hidden" name="from_name" value="Inkwake Careers Portal">
       <input type="checkbox" name="botcheck" style="display:none" tabindex="-1" autocomplete="off">
+      
       <div class="field">
         <label for="a-name">Full Name</label>
         <input type="text" id="a-name" name="name" required>
