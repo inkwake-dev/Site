@@ -113,7 +113,7 @@ function inkwakeInitPortfolio(){
   render();
 }
 
-/* ---------- Real-time form validation (Contact / Apply) ---------- */
+/* ---------- Real-time form validation ---------- */
 function inkwakeValidateField(field){
   const input = field.querySelector('input, select, textarea');
   const errorEl = field.querySelector('.error-msg');
@@ -133,13 +133,14 @@ function inkwakeValidateField(field){
   return !message;
 }
 
-/* ---------- Real-time form validation (Contact / Apply) ---------- */
-function inkwakeInitForm(formSelector, successSelector){
+/* ---------- Multi-Service Form Submissions (Web3Forms & Forminit) ---------- */
+function inkwakeInitForm(formSelector, successSelector, service = 'web3forms'){
   const form = document.querySelector(formSelector);
   if(!form) return;
   const success = document.querySelector(successSelector);
   const submitBtn = form.querySelector('button[type="submit"]');
 
+  // Attach validation listeners
   form.querySelectorAll('.field').forEach(field => {
     const input = field.querySelector('input, select, textarea');
     if(!input) return;
@@ -150,9 +151,11 @@ function inkwakeInitForm(formSelector, successSelector){
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     let valid = true;
+    
+    // Check all fields
     form.querySelectorAll('.field').forEach(field => { if(!inkwakeValidateField(field)) valid = false; });
 
-    // Required checkboxes outside .field wrappers (e.g. Terms & Privacy agreement)
+    // Required checkboxes outside .field wrappers
     form.querySelectorAll('.field-checkbox input[type="checkbox"][required]').forEach(cb => {
       const wrap = cb.closest('.field-checkbox');
       if(!cb.checked){
@@ -169,37 +172,51 @@ function inkwakeInitForm(formSelector, successSelector){
       return;
     }
 
-    // UPDATED: Correctly grab the key from include.js
-    const key = typeof web3formsAccessKey !== 'undefined' ? web3formsAccessKey : '';
-    const configured = key && key !== 'YOUR_WEB3FORMS_ACCESS_KEY';
+    const formData = new FormData(form);
+    let fetchUrl = '';
 
-    if(!configured){
-      console.warn('Inkwake: web3formsAccessKey is not set in include.js — this submission was NOT sent anywhere.');
-      if(success){ success.classList.add('show'); form.reset(); }
-      return;
+    // Route logic based on the requested service
+    if (service === 'web3forms') {
+      const key = typeof web3formsAccessKey !== 'undefined' ? web3formsAccessKey : '';
+      if(!key || key === 'YOUR_WEB3FORMS_ACCESS_KEY'){
+        console.warn('Inkwake: web3formsAccessKey is not set. Submission aborted.');
+        if(success){ success.classList.add('show'); form.reset(); }
+        return;
+      }
+      formData.append('access_key', key);
+      fetchUrl = 'https://api.web3forms.com/submit';
+    } else if (service === 'forminit') {
+      // Pulls the unique endpoint directly from your career.html form action
+      fetchUrl = form.getAttribute('action'); 
+      if(!fetchUrl) {
+        console.error('Inkwake: Forminit requires an action URL on the form element.');
+        return;
+      }
     }
 
-    // FormData automatically handles file inputs as long as the HTML enctype is set
-    const formData = new FormData(form);
-    formData.append('access_key', key);
-    
     if(submitBtn){ submitBtn.disabled = true; submitBtn.textContent = 'Sending…'; }
 
     try{
-      const res = await fetch('https://api.web3forms.com/submit', {
+      const res = await fetch(fetchUrl, {
         method: 'POST',
-        headers: { 'Accept': 'application/json' }, // Do NOT set Content-Type, the browser handles it for files
+        headers: { 'Accept': 'application/json' }, 
         body: formData
       });
-      const result = await res.json();
-      if(result.success){
+      
+      if(res.ok){
+        // res.ok is reliable for Forminit. We parse JSON just to double check Web3Forms specific false-successes.
+        const result = await res.json().catch(() => ({})); 
+        if (service === 'web3forms' && result.success === false) {
+           throw new Error(result.message || 'Web3Forms rejected submission');
+        }
         if(success){ success.classList.add('show'); form.reset(); }
       } else {
-        throw new Error(result.message || 'Submission failed');
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Submission failed');
       }
     } catch(err){
       console.error('Inkwake: form submission failed', err);
-      alert("Something went wrong sending your application. Please check your file size (Max 5MB) and try again.");
+      alert("Something went wrong processing your request. Please ensure files are within size limits and try again.");
     } finally {
       if(submitBtn){ submitBtn.disabled = false; submitBtn.textContent = submitBtn.getAttribute('data-label') || 'Submit'; }
     }
@@ -338,8 +355,6 @@ function inkwakeInitCookieConsent(){
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Partials load asynchronously in include.js; give the DOM a tick so
-  // reveal-list footer links (inside partials) get observed correctly.
   setTimeout(() => {
     inkwakeInitReveal();
   }, 60);
@@ -348,8 +363,11 @@ document.addEventListener('DOMContentLoaded', () => {
   inkwakeInitCounters();
   inkwakeInitFaq();
   inkwakeInitPortfolio();
-  // inkwakeInitForm('#contact-form', '#contact-success');
-  inkwakeInitForm('#apply-form', '#apply-success');
+  
+  // Here is where the magic happens! We pass the specific service for each form.
+  inkwakeInitForm('#contact-form', '#contact-success', 'web3forms');
+  inkwakeInitForm('#apply-form', '#apply-success', 'forminit');
+  
   inkwakeInitScrollspy();
   inkwakeInitParallax();
   inkwakeInitTestimonials();
