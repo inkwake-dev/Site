@@ -393,7 +393,7 @@ document.addEventListener('DOMContentLoaded', () => {
   inkwakeInitForm('#contact-form', '#contact-success', 'web3forms');
   
   // Keep this commented out so Forminit file uploads work natively via the browser!
-  // inkwakeInitForm('#apply-form', '#apply-success', 'forminit');
+  inkwakeInitForm('#apply-form', '#apply-success', 'forminit');
   
   inkwakeInitScrollspy();
   inkwakeInitParallax();
