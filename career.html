@@ -246,35 +246,45 @@
     </div>
 
     <!-- UPDATED FORM TAG FOR FORMINIT INTEGRATION -->
+<!-- UPDATED FORM TAG FOR FORMINIT INTEGRATION -->
     <form action="https://forminit.com/f/7wgfclt7byw" method="POST" id="apply-form" class="form-grid" enctype="multipart/form-data" novalidate>
       
       <div class="field">
         <label for="a-name">Full Name</label>
-        <input type="text" id="a-name" name="name" required>
+        <!-- Changed to fi-sender-fullName -->
+        <input type="text" id="a-name" name="fi-sender-fullName" required>
         <span class="error-msg"></span>
       </div>
+      
       <div class="field">
         <label for="a-phone">Phone Number</label>
-        <input type="tel" id="a-phone" name="phone" required>
+        <!-- Changed to fi-sender-phone -->
+        <input type="tel" id="a-phone" name="fi-sender-phone" required>
         <span class="error-msg"></span>
       </div>
+      
       <div class="field">
         <label for="a-email">Email</label>
-        <input type="email" id="a-email" name="email" required>
+        <!-- Changed to fi-sender-email -->
+        <input type="email" id="a-email" name="fi-sender-email" required>
         <span class="error-msg"></span>
       </div>
+      
       <div class="field">
         <label for="a-role">Role You're Applying For</label>
-        <select id="a-role" name="role" required>
+        <!-- Changed to fi-text-role -->
+        <select id="a-role" name="fi-text-role" required>
           <option value="">Select a role</option>
           <option value="full-stack-developer">Full Stack Developer</option>
           <option value="data-engineer">Data Engineer</option>
         </select>
         <span class="error-msg"></span>
       </div>
+      
       <div class="field">
         <label for="a-experience">Experience Level</label>
-        <select id="a-experience" name="experience" required>
+        <!-- Changed to fi-text-experience -->
+        <select id="a-experience" name="fi-text-experience" required>
           <option value="">Select experience</option>
           <option value="fresher">Fresher</option>
           <option value="1-2">1–2 years</option>
@@ -282,27 +292,35 @@
         </select>
         <span class="error-msg"></span>
       </div>
+      
       <div class="field">
         <label for="a-portfolio">Portfolio / LinkedIn / GitHub (optional)</label>
-        <input type="url" id="a-portfolio" name="portfolio">
+        <!-- Changed to fi-text-portfolio -->
+        <input type="url" id="a-portfolio" name="fi-text-portfolio">
         <span class="error-msg"></span>
       </div>
+      
       <div class="field full">
         <label for="a-message">Cover Letter</label>
-        <textarea id="a-message" name="message" rows="4" required></textarea>
+        <!-- Changed to fi-text-message -->
+        <textarea id="a-message" name="fi-text-message" rows="4" required></textarea>
         <span class="error-msg"></span>
       </div>
+      
       <div class="field full">
         <label for="a-resume">Resume (PDF)</label>
-        <input type="file" id="a-resume" name="resume" accept=".pdf" required>
+        <!-- Changed to fi-file-resume -->
+        <input type="file" id="a-resume" name="fi-file-resume" accept=".pdf" required>
         <span class="error-msg"></span>
       </div>
+      
       <div class="field full">
         <div class="field-checkbox">
           <input type="checkbox" id="a-agree" required>
           <label for="a-agree">I agree to Inkwake's <a href="terms.html" target="_blank">Terms &amp; Conditions</a> and <a href="privacy.html" target="_blank">Privacy Policy</a>, including how my resume is handled.</label>
         </div>
       </div>
+      
       <div class="field full">
         <button type="submit" class="btn btn-primary" data-label="Submit Application">Submit Application</button>
         <p class="form-note">Submissions are sent securely via Forminit directly to our inbox.</p>
