@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 
 # Direct path to your production sitemap
-Sitemap: https://vercel.app
+Sitemap: https://inkwake.vercel.app/sitemap.xml
