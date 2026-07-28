@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://sitemaps.org">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <!-- Home Page -->
   <url>
     <loc>https://inkwake.vercel.app/</loc>
@@ -9,42 +9,42 @@
   </url>
   <!-- About Page -->
   <url>
-    <loc>https://vercel.app</loc>
+    <loc>https://inkwake.vercel.app/about.html</loc>
     <lastmod>2026-07-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <!-- Careers Page -->
   <url>
-    <loc>https://vercel.app</loc>
+    <loc>https://inkwake.vercel.app/career.html</loc>
     <lastmod>2026-07-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <!-- Contact Page -->
   <url>
-    <loc>https://vercel.app</loc>
+    <loc>https://inkwake.vercel.app/contact.html</loc>
     <lastmod>2026-07-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <!-- FAQ Page -->
   <url>
-    <loc>https://vercel.app</loc>
+    <loc>https://inkwake.vercel.app/faq.html</loc>
     <lastmod>2026-07-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <!-- Terms Page -->
   <url>
-    <loc>https://vercel.app</loc>
+    <loc>https://inkwake.vercel.app/terms.html</loc>
     <lastmod>2026-07-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
   <!-- Privacy Policy Page -->
   <url>
-    <loc>https://vercel.app</loc>
+    <loc>https://inkwake.vercel.app/privacy.html</loc>
     <lastmod>2026-07-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
